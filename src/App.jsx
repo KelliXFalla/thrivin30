@@ -1,4 +1,4 @@
-import { useState, useRef } from “react”;
+import { useState, useRef, useEffect } from “react”;
 
 const C = {
 bg: “#0c0b09”, surface: “#161412”, card: “#1e1b16”,
@@ -6,6 +6,50 @@ border: “#2c2820”, accent: “#e8915a”, accentD: “#c46e38”, gold: “#
 sand: “#c4b090”, text: “#f0ebe3”, muted: “#6e6354”, green: “#5fb882”,
 blue: “#5ba8d4”, lavender: “#9b8ec4”,
 };
+
+const DAILY_CELEBRATIONS = [
+“YOU ARE ON FIRE! 🔥 80%+ today — this is what transformation looks like!”,
+“YES!! 🎉 Look at you showing up! This is the version of you that changes everything!”,
+“CRUSHING IT! ⚡ 80%+ habits done — your future self is cheering you on!”,
+“THIS IS IT! 🏆 This is exactly what becoming her/him looks like. You’re doing it!”,
+“LEGENDARY! 🔥 80%+ today — not everyone does this. But YOU do. Keep going!”,
+“THAT’S WHAT WE’RE TALKING ABOUT! 🎊 80%+ — you are unstoppable!”,
+];
+
+const WEEKLY_CELEBRATIONS = [
+“WHAT A WEEK! 🏆 80%+ average — you didn’t just survive the week, you OWNED it!”,
+“WEEKLY WARRIOR! 🔥 You showed up 80%+ this week. This is your new identity now!”,
+“7 DAYS STRONGER! ⚡ 80%+ weekly average — Bali is getting closer with every day like this!”,
+“YOU ARE THE PROGRAM! 🎊 80%+ this week — this is what Rise. Reset. Thrive. looks like in action!”,
+];
+
+function CelebrationPopup({ message, onClose }) {
+useEffect(() => {
+const timer = setTimeout(onClose, 5000);
+return () => clearTimeout(timer);
+}, [onClose]);
+
+return (
+<div style={{
+position: “fixed”, top: 0, left: 0, right: 0, bottom: 0,
+background: “#000000aa”, zIndex: 9999,
+display: “flex”, alignItems: “center”, justifyContent: “center”, padding: 24,
+}} onClick={onClose}>
+<div style={{
+background: “linear-gradient(145deg,#1e1b16,#2a2010)”,
+border: “2px solid “ + C.gold,
+borderRadius: 24, padding: 32, textAlign: “center”, maxWidth: 340,
+boxShadow: “0 0 60px “ + C.gold + “40”,
+}}>
+<div style={{ fontSize: 52, marginBottom: 16 }}>🎉</div>
+<div style={{ color: C.gold, fontWeight: 800, fontSize: 18, fontFamily: “‘Cormorant Garamond’,serif”, lineHeight: 1.4, marginBottom: 16 }}>
+{message}
+</div>
+<div style={{ color: C.muted, fontSize: 12 }}>Tap anywhere to close</div>
+</div>
+</div>
+);
+}
 
 const PHASES = [
 { id: 1, days: “Days 1–10”, name: “CLEANSE”, color: C.accent, desc: “10-day Tolman colon cleanse & fast prep — detox, reset your gut, ignite cellular renewal” },
@@ -128,9 +172,20 @@ const v = habitValues[h.id] || 0;
 return h.max === 1 ? v >= 1 : v >= h.max * 0.75;
 }).length;
 const score = Math.round((done / HABITS_CORE.length) * 100);
+const [celebration, setCelebration] = useState(null);
+const [celebratedToday, setCelebratedToday] = useState(false);
+
+useEffect(() => {
+if (score >= 80 && !celebratedToday) {
+const msg = DAILY_CELEBRATIONS[Math.floor(Math.random() * DAILY_CELEBRATIONS.length)];
+setCelebration(msg);
+setCelebratedToday(true);
+}
+}, [score]);
 
 return (
 <div style={{ display: “flex”, flexDirection: “column”, gap: 18 }}>
+{celebration && <CelebrationPopup message={celebration} onClose={() => setCelebration(null)} />}
 <div style={{ background: “linear-gradient(145deg,#1e1b16,#27200e)”, borderRadius: 20, padding: 22, border: “1px solid “ + C.border, position: “relative”, overflow: “hidden” }}>
 <div style={{ position: “absolute”, top: -60, right: -50, width: 190, height: 190, borderRadius: “50%”, background: “radial-gradient(circle,” + C.accent + “18,transparent 65%)” }} />
 <div style={{ color: C.muted, fontSize: 11, textTransform: “uppercase”, letterSpacing: 2 }}>Good morning</div>
@@ -198,9 +253,25 @@ return (
 
 function MyDay({ habitValues, setHabitValues, workoutLog, setWorkoutLog, optionals, setOptionals }) {
 const today = new Date().toLocaleDateString(“en-AU”, { weekday: “long”, day: “numeric”, month: “long” });
+const done = HABITS_CORE.filter(h => {
+const v = habitValues[h.id] || 0;
+return h.max === 1 ? v >= 1 : v >= h.max * 0.75;
+}).length;
+const score = Math.round((done / HABITS_CORE.length) * 100);
+const [celebration, setCelebration] = useState(null);
+const [celebratedToday, setCelebratedToday] = useState(false);
+
+useEffect(() => {
+if (score >= 80 && !celebratedToday) {
+const msg = DAILY_CELEBRATIONS[Math.floor(Math.random() * DAILY_CELEBRATIONS.length)];
+setCelebration(msg);
+setCelebratedToday(true);
+}
+}, [score]);
 
 return (
 <div style={{ display: “flex”, flexDirection: “column”, gap: 16 }}>
+{celebration && <CelebrationPopup message={celebration} onClose={() => setCelebration(null)} />}
 <div>
 <div style={{ color: C.muted, fontSize: 11, textTransform: “uppercase”, letterSpacing: 2 }}>Daily Check-In</div>
 <div style={{ color: C.text, fontSize: 22, fontWeight: 800, fontFamily: “‘Cormorant Garamond’,serif” }}>{today}</div>
@@ -832,7 +903,22 @@ return (
 <div style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 800, fontSize: 26, color: C.accent, letterSpacing: -0.5 }}>THRIVIN<span style={{ color: C.gold }}>30</span></div>
 <div style={{ fontSize: 10, color: C.muted, textTransform: "uppercase", letterSpacing: 2.5 }}>40-Day Longevity Reset</div>
 </div>
-<div style={{ width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg," + C.accent + "," + C.gold + ")", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 15, color: C.bg, fontFamily: "'Cormorant Garamond',serif" }}>K</div>
+<div onClick={() => {
+if (window.confirm("Reset your THRIVIN30 journey? This will clear your name and start date so you can begin a new round!")) {
+localStorage.removeItem("thrivin30_name");
+localStorage.removeItem("thrivin30_start");
+setMember("");
+setStartDate("");
+setNameInput("");
+setStartDateInput("");
+setHabitValues({ water: 0, sleep: 0, gratitude: 0, cold: 0, pd: 0, dream: 0, morning_ritual: 0, greens: 0, wholefoods: 0, noalcohol: 0 });
+setWorkoutLog({});
+setOptionals({});
+setPhotos({});
+setSoulDay(null);
+setTab(0);
+}
+}} style={{ width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg," + C.accent + "," + C.gold + ")", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 15, color: C.bg, fontFamily: "'Cormorant Garamond',serif", cursor: "pointer" }}>{member.charAt(0).toUpperCase()}</div>
 </div>
 
 <div style={{ display: "flex", gap: 4, padding: "14px 16px 0", overflowX: "auto", scrollbarWidth: "none" }}>
