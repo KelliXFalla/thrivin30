@@ -1,4 +1,4 @@
-mport { useState, useRef } from “react”;
+import { useState, useRef } from “react”;
 
 const C = {
 bg: “#0c0b09”, surface: “#161412”, card: “#1e1b16”,
